@@ -4,16 +4,77 @@
 # Gonna be the heaviest boy
 # TODO Decide whether or not procedure based input_parsing, or in main_loop
 # TODO User movement inside of
+# Changelog: Added GameState object into here
 
 import pygame as pg
 import entities
-import state
+import scene
 import screen
 
+class GameState:
+
+    """
+    Container object for everything you need in the main game.
+    Use this to pass around data to scenes or for initialization
+    """
+    def __init__(self, *groups):
+        pass
+
+
+# GameScene Object
+class GameScene(scene.Scene):
+    """
+    Main GameScene object to hold primary game interactions
+    Data that is held includes the various Sprite groups, metadata like score stuff
+
+    """
+
+    def __init__(self, state: GameState=None, **settings):
+        """
+        Creates new game scene with optional GameState
+        :param state: Previous GameState to be loaded in, if None state is initialized
+        """
+        self.final: bool = False # Use for quitting main game_loop
+        self.next: str = None # Use for setting next element
+        self.next_params: dict = False
+        if state is None:
+            # TODO rest of imports
+            self.render_group = pg.sprite.Group()
+            self.player_group = pg.sprite.GroupSingle()
+            self.player = entities.Player(200,200)
+            self.lives = 2
+            self.total_score = 0
+            self.local_score = 0
+            self.score_increment = 5000
+        else:
+            return # Do GameState Unwrapping
+
+    def parse_input(self, *events):
+        """
+        Takes in
+        :param events: Events to be parsed
+        :return:
+        """
+        for event in events:
+            if event.type == "quit":
+                self.final = True
+
+            else:
+                return
+        pass
+
+    def update(self, dt):
+        pass
+
+    def render(self, surface):
+        # First, do background scroll
+        # Then, render every object in Render Group into it
+        # Finally Render GUI if changes have occured
+        pass
 
 
 
-
+### Delete This but scavenge what you can
 class PlayState(state.State):
     def __init__(self, mainscreen):
         """
