@@ -1,20 +1,10 @@
-import json
-import pygame
-# General class Structure
-# Code notes:
-# Procedure - explicit side effects outside of parameters, may or may not have return value
-# Semi-pure/Mutator - "semi-pure" - may induce side effects in parameters, may or may not have return value
-# Pure - has explicit return value and no side effects
-# Data based approach - Dynamic class creation
-# create_entities -> List[Entities];
-# Entities = type(json.name, json.(hierachy objects), json.dict
-import pygame
-sprite = pygame.sprite
-Rect = pygame.Rect
-import typing
+# Entites and various ingame things
+# Should use class methods for setup and image loading
+import pygame as pg
 
 
-class Actor(sprite.Sprite):
+# Actor class currently dead in the water but may be re-worked for Monster class
+class Actor(pg.sprite.Sprite):
     """
     Actor Class (Extends Sprite)
     Adds significant versaility for object interaction
@@ -26,7 +16,8 @@ class Actor(sprite.Sprite):
     fire() None
     animate()
     """
-    def __init__(self,x,y,frame = 0, *groups):
+
+    def __init__(self, x, y, frame=0, *groups):
         super(Actor, self).__init__(*groups)
         self.x = x
         self.y = y
@@ -51,7 +42,7 @@ class Actor(sprite.Sprite):
     def on_death(self):
         pass
 
-    def fire(self):
+    def fire(self, *groups):
         pass
 
     def animate(self, dt):
@@ -71,32 +62,13 @@ class Actor(sprite.Sprite):
     HP_Max = int()
 
 
-class ActorGroup(sprite.Group):
-    """
-    Actor Group Class
-
-    Extends Group by adding an additional interface element, act()
-    Actor objects have two distinct elements, act() and update()
-    """
-    def act(self, *args):
-        """Mutator Call the act method of every member sprite
-        any return values from sprite.act() cannot be retrieved
-        :arg args to be passed
-        :return None
-        """
-        for s in self.sprites():
-            s.act(*args)
-
-# Implementation of usable Player stuff
-
-
-class Player(Actor):
-    Spritesheet = pygame.image.load("../Assets/Ship.bmp")
-    Graph_Rect = Rect(0, 0, 64, 64)
+class Player(pg.sprite.Sprite):
+    Spritesheet = pg.image.load("../Assets/Ship.bmp")
+    Graph_Rect = pg.Rect(0, 0, 64, 64)
     Anim_Idle = [Spritesheet]
 
     def __init__(self, x, y, lives=2, frame=0, hp=100, *groups):
-        super(Player, self).__init__(x, y, frame, groups)
+        super(Player, self).__init__(groups)
         """
         :param x:
         :param y:
@@ -104,7 +76,7 @@ class Player(Actor):
         :param frame:
         :param groups
         """
-        self.rect = Rect(0, 0, 64, 64).move(x, y)
+        self.rect = pg.Rect(0, 0, 64, 64).move(x, y)
         # Starting health
         self.hp = hp
         # Class positions
@@ -133,21 +105,24 @@ class Player(Actor):
 
     def set_direction(self, dx=None, dy=None):
         if dx is not None:
-            self.vx = dx* self.speed
+            self.vx = dx * self.speed
         if dy is not None:
             self.vy = dy * self.speed
         return
 
-    def update(self, *args):
+    def update(self, dt, *groups):
         """
         Prcoedure updates the module and all appropriate AI/elements
-        :param args: todo implement this bullshit
+        :param dt: time interval for
         """
-        self.x += self.vx
-        self.y += self.vy
-        self.rect.move_ip(self.vx * self.speed, self.vy * self.speed)
-        # print(str(self.x) + " " + str(self.y))
+        self.x += self.vx * dt
+        self.y += self.vy * dt
+        # TODO collision detection to ensure does not move out of gamespace
+        self.rect.move_ip(self.x, self.y)
         return
 
     def animate(self, dt=0):
+        pass
+
+    def fire(self, *groups):
         pass

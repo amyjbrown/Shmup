@@ -24,15 +24,16 @@ class EventManager:
     Should work like pygame Events does
     """
 
-    def __init__(self, keys, key_map=None):
+    def __init__(self, buttons, key_map=None):
         """
-
+        Initializes the Event manager with appropriate values
         :param keys: Custom Key tokens to be added
         :param key_map: Map of Custom Event Str tokens -> PG Keys, to be repacked in it
         """
-        self.buttons = keys  # Note QUIT is a special type here
+        self.buttons = buttons  # Note QUIT is a special type here
         self.pressed = dict()
         self.key_map = dict()
+        self.inputs = list()
         # Initialize allows for multiple keys to map to commands
         for custom in key_map:
             for pygame_key in key_map[custom]:
@@ -40,12 +41,8 @@ class EventManager:
         # for python _pressed method
         for b in keys:
             self.pressed[b] = False
-        # Creates forbidden keys
-        pg.event.set_allowed(None)  # Blocks all keys except for keys I push
-        for key in self.key_map.keys():
-            print(key)
-            pg.event.set_allowed(key)  # Allows all keys that have custom mapping
-        pg.event.set_allowed(pg.QUIT)  # Also adds omni useful QUIT
+        # Sets values we are allowed to have as input
+        self.inputs = list(self.key_map.keys())
         return
 
     def reset_map(self, key_map):
@@ -61,19 +58,19 @@ class EventManager:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 event_list.append(Event("QUIT", False))
-            elif event.type == pg.KEYDOWN:
-                key = self.buttons[event.key]
+            elif event.type == pg.KEYDOWN and event.key in self.inputs:
+                key = self.key_map[event.key]
                 event_list.append(Event(key, True))
                 self.pressed[key] = True
-            elif event.type == pg.KEYUP:
-                event_list.append(Event(self.buttons[event.key], False))
+            elif event.type == pg.KEYUP and event.key in self.inputs:
+                event_list.append(Event(self.key_map[event.key], False))
         return event_list
 
 
 # unit test
 if __name__ == "__main__":
     display = pg.display.set_mode((200,200))
-    keys = [pg.K_SPACE,pg.K_UP,pg.K_DOWN, pg.K_LEFT, pg.K_RIGHT, pg.K_ESCAPE, pg.K_x, pg.K_z]
+    keys = ["up", "down", "left", "right", "fire", "missile", "bomb", "menu"]
     # Keymap more to remind myself than anything else
     key_map = {"up": [pg.K_UP, pg.K_w],
                "down": [pg.K_DOWN, pg.K_s],
@@ -85,10 +82,10 @@ if __name__ == "__main__":
                "bomb": [pg.K_z],
                }
     manager = EventManager(keys, key_map)
-    while True:
+    test = True
+    while test:
         events = manager.get()
-        if events:
-            for event in events:
-                print(event)
-                if event.key == "QUIT" or event.key == "menu":
-                    break
+        for event in events:
+            print(event)
+            if event.key is "QUIT" or event.key is "menu":
+                test = False

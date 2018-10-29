@@ -13,11 +13,11 @@ import screen
 
 
 class GameState:
-
     """
     Container object for everything you need in the main game.
     Use this to pass around data to scenes or for initialization
     """
+
     def __init__(self, ):
         pass
 
@@ -27,22 +27,27 @@ class GameScene(scene.Scene):
     """
     Main GameScene object to hold primary game interactions
     Data that is held includes the various Sprite groups, metadata like score stuff
-
     """
 
-    def __init__(self, state: GameState=None, **settings):
+    def __init__(self, state: GameState = None, **settings):
         """
         Creates new game scene with optional GameState
         :param state: Previous GameState to be loaded in, if None state is initialized
         """
-        self.final: bool = False # Use for quitting main game_loop
-        self.next: str = None # Use for setting next element
+        self.final: bool = False  # Use for quitting main game_loop
+        self.next: str = None  # Use for setting next element
         self.next_params: dict = False
         if state is None:
-            # TODO rest of imports
-            self.render_group = pg.sprite.Group()
-            self.player_group = pg.sprite.GroupSingle()
+            # Player Initialization
+            # TODO move a lot of info out of player
             self.player = entities.Player(200, 200)
+            # Groups
+            self.render_group = pg.sprite.Group()
+            self.effects = pg.sprite.Group()
+            self.enemies = pg.sprite.Group()
+            self.tokens = pg.sprite.Group()
+            self.ally_bullets = pg.sprite.Group()
+            self.enemy_bullets = pg.sprite.Group()
             self.lives = 2
             self.total_score = 0
             self.local_score = 0
@@ -70,7 +75,10 @@ class GameScene(scene.Scene):
                     self.player.vx = self.player.speed
                 elif event.key == "menu":
                     # TODO params for pause menu
-                    self.next = "PAUSE"
+                    self.next = "MENU"
+                elif event.key == "space":
+                    self.player.fire(self.ally_bullets)
+                # TODO other specials
             elif event.up:
                 if event.key == "up":
                     self.player.vy = 0
@@ -83,16 +91,38 @@ class GameScene(scene.Scene):
         pass
 
     def update(self, dt):
-        # TODO go through spriteGroups and do appropriate updates
-        # TODO go through
-        pass
+        # Updates every entity, using delta time
+        self.render_group.update(dt)
+        # TODO spawns appropriate entities given Level_Time
+        # Check for enemies colliding with player
+        for sprite in pg.sprite.spritecollide(self.player, self.enemies, dokill=False):
+            sprite.collide(self.player)
+        # Check for bullets
+        for bullet in pg.sprite.spritecollide(self.player, self.enemy_bullets, dokill=True):
+            bullet.collide(self.player)
+        # do group_collide with friendly bullets and enemies
+        for token in pg.sprite.spritecollide(self.player, self.tokens, dokill=True):
+            token.effect(self.player)
+        # Checks collision between friendly bullets and enemies bullets, apply bullet effects to each
+        collide_dict = pg.sprite.groupcollide(self.enemies, self.ally_bullets, dokilla=False, dokillb=True)
+        for enemy in collide_dict:
+            for bullet in collide_dict[enemy]:
+                bullet.collide(enemy)
+        # TODO how to check for score
+        # TODO logic on player if player is alive
+        # TODO Screen object should be scrolled by dt
+        return
 
-    def render(self, surface):
-        # First, do background scroll
-        # Then, render every object in Render Group into it
-        # Finally Render GUI if changes have occured
-        pass
+    def render(self, screen):
+        """
 
+        :param screen: screen.Screen object to utilize
+        :return:
+        """
+        # blit background
+        # Blit main
+        self.render_group.draw(screen.play_screen)
+        pass
 
 
 ### Delete This but scavenge what you can
@@ -109,8 +139,8 @@ class PlayState(state.State):
         #
         self.screen = mainscreen
         self.playscreen = screen.Background(mainscreen,
-                    im='../Assets/BG1.bmp',
-                    r=pg.Rect(0, 0, 400, 640))
+                                            im='../Assets/BG1.bmp',
+                                            r=pg.Rect(0, 0, 400, 640))
         # Set up main Clock mechanism
         self.clock = pg.time.Clock()
         # Set up groups
@@ -128,7 +158,7 @@ class PlayState(state.State):
         """
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                self.game = False # Exit
+                self.game = False  # Exit
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_DOWN:
                     self.player.set_direction(dy=1)
@@ -151,8 +181,8 @@ class PlayState(state.State):
                     self.player.set_direction(dx=0)
         return
 
+    def run(self) -> tuple:
 
-    def run(self)->tuple:
         """
         Procedure Main gameplay. All game actions occur in here
         Level selection and player params set by __init__

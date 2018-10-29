@@ -74,7 +74,7 @@ class SceneManager:
         self.current_scene: Scene = self.scenes[self.current_id]()
         return
 
-    def swap_scene(self, next_scene:str, settings: dict):
+    def swap_scene(self, next_scene: str, settings: dict):
         """
         <MUT> Attempts to load in new_scene, will raise Error if not
         :param next_scene:
@@ -99,13 +99,14 @@ class SceneManager:
         # Game utilities outside of the structure
         clock = pg.time.Clock()
         global display # Surface we blit to, a Singleton
-        event_managaer = None # TODO implement
+        global event_manager
+        global audiomanager
         # While Game
         while not self.current_scene.final:
-            dt = clock.Tick(60)  # Takes dt and locks max framerate at 60
-            self.current_scene.parse_input(None)
+            dt = clock.Tick(60) / 1000  # Takes dt and locks max framerate at 60
+            self.current_scene.parse_input(event_manager.get())
             self.current_scene.update(dt)
-            if self.current_scene.next: # check here so no one-frame lag of loading new scene
+            if self.current_scene.next:  # check here so no one-frame lag of loading new scene
                 self.swap_scene(self.current_scene.next, self.current_scene.next_params)
             self.current_scene.render(display)
         # Once we reach scene.final, we do end/cleanup
