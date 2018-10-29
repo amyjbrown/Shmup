@@ -19,7 +19,7 @@ class Scene:
         :param settings: settings to be passed to an individual scene for setup
         """
         self.final: bool = False # Use for quitting main game_loop
-        self.next: str = None # Use for setting next element
+        self.next: str = None  # Use for setting next element
         self.next_params: dict = False
         pass
 

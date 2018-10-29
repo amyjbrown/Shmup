@@ -5,11 +5,12 @@
 # TODO Decide whether or not procedure based input_parsing, or in main_loop
 # TODO User movement inside of
 # Changelog: Added GameState object into here
-
 import pygame as pg
+
 import entities
 import scene
 import screen
+
 
 class GameState:
 
@@ -17,7 +18,7 @@ class GameState:
     Container object for everything you need in the main game.
     Use this to pass around data to scenes or for initialization
     """
-    def __init__(self, *groups):
+    def __init__(self, ):
         pass
 
 
@@ -41,13 +42,13 @@ class GameScene(scene.Scene):
             # TODO rest of imports
             self.render_group = pg.sprite.Group()
             self.player_group = pg.sprite.GroupSingle()
-            self.player = entities.Player(200,200)
+            self.player = entities.Player(200, 200)
             self.lives = 2
             self.total_score = 0
             self.local_score = 0
             self.score_increment = 5000
         else:
-            return # Do GameState Unwrapping
+            return  # Do GameState Unwrapping
 
     def parse_input(self, *events):
         """
@@ -56,14 +57,34 @@ class GameScene(scene.Scene):
         :return:
         """
         for event in events:
-            if event.type == "quit":
-                self.final = True
-
-            else:
-                return
+            if event.key == "QUIT":
+                self.final = True  # Quit loop
+            elif event.down:
+                if event.key == "up":
+                    self.player.vy = -self.player.speed
+                elif event.key == "down":
+                    self.player.vy = self.player
+                elif event.key == "left":
+                    self.player.vx = -self.player.speed
+                elif event.key == "right":
+                    self.player.vx = self.player.speed
+                elif event.key == "menu":
+                    # TODO params for pause menu
+                    self.next = "PAUSE"
+            elif event.up:
+                if event.key == "up":
+                    self.player.vy = 0
+                elif event.key == "down":
+                    self.player.vy = 0
+                elif event.key == "left":
+                    self.player.vx = 0
+                elif event.key == "right":
+                    self.player.vx = 0
         pass
 
     def update(self, dt):
+        # TODO go through spriteGroups and do appropriate updates
+        # TODO go through
         pass
 
     def render(self, surface):
