@@ -1,7 +1,5 @@
-import math
 import pygame
 # import os
-import math
 
 
 class Background:
@@ -14,20 +12,20 @@ class Background:
         :param speed: Speed in pixels updated per frame Positive scrolls up, negative scrolls down
         """
         self.surface = surface.subsurface(r)
-        self.im = pygame.image.load(im)  # Creates surface
+        self.im = pygame.image.load(im).convert()  # Creates surface
         self.w, self.h = self.im.get_size()
         self.x = 0
         self.y1 = 0
         self.y2 = -self.h
         self.speed = speed
 
-    def scroll(self) -> None:
+    def scroll(self, dt) -> None:
         """
         Procedure
         Scrolls the background in the play area
         """
-        self.y1 += self.speed
-        self.y2 += self.speed
+        self.y1 += self.speed * dt
+        self.y2 += self.speed * dt
         # print(self.y1); print(self.y2)
         self.surface.blit(self.im.convert(), (self.x, self.y1))
         self.surface.blit(self.im.convert(), (self.x, self.y2))
@@ -52,17 +50,17 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((400, 640))
     bg = Background(surface=screen,
                     im='C:/Users/Jonathan/PycharmProjects/shmup/Assets/BG1.bmp',
-                    r=pygame.Rect(0, 0, 400, 640))
+                    r=pygame.Rect(0, 0, 400, 640),
+                    speed=42)
     Game = True
     Clock = pygame.time.Clock()
     while Game:
-        pygame.display.flip()
+        dt = Clock.tick() / 1000
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     bg.speed = float(input("Enter new Speed: "))
             elif event.type == pygame.QUIT:
                 Game = False
-        bg.scroll()
+        bg.scroll(dt)
         pygame.display.flip()
-        Clock.tick(60)

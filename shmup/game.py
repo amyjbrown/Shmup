@@ -12,16 +12,6 @@ import scene
 import screen
 
 
-class GameState:
-    """
-    Container object for everything you need in the main game.
-    Use this to pass around data to scenes or for initialization
-    """
-
-    def __init__(self, ):
-        pass
-
-
 # GameScene Object
 class GameScene(scene.Scene):
     """
@@ -29,7 +19,7 @@ class GameScene(scene.Scene):
     Data that is held includes the various Sprite groups, metadata like score stuff
     """
 
-    def __init__(self, state: GameState = None, **settings):
+    def __init__(self, **settings):
         """
         Creates new game scene with optional GameState
         :param state: Previous GameState to be loaded in, if None state is initialized
@@ -37,23 +27,29 @@ class GameScene(scene.Scene):
         self.final: bool = False  # Use for quitting main game_loop
         self.next: str = None  # Use for setting next element
         self.next_params: dict = False
-        if state is None:
-            # Player Initialization
-            # TODO move a lot of info out of player
-            self.player = entities.Player(200, 200)
-            # Groups
-            self.render_group = pg.sprite.Group()
-            self.effects = pg.sprite.Group()
-            self.enemies = pg.sprite.Group()
-            self.tokens = pg.sprite.Group()
-            self.ally_bullets = pg.sprite.Group()
-            self.enemy_bullets = pg.sprite.Group()
-            self.lives = 2
-            self.total_score = 0
-            self.local_score = 0
-            self.score_increment = 5000
-        else:
-            return  # Do GameState Unwrapping
+        # Player Initialization
+        self.player = entities.Player(200, 200)
+        # Groups
+        # self.player_screen = screen.Background() Init details
+        # TODO - Config file for initializing Display, etc.
+        self.render_group = pg.sprite.Group()
+        self.effects = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
+        self.tokens = pg.sprite.Group()
+        self.ally_bullets = pg.sprite.Group()
+        self.enemy_bullets = pg.sprite.Group()
+        self.lives = 2
+        self.total_score = 0
+        self.local_score = 0
+        self.score_increment = 5000
+        return
+
+    def reset(self):
+        """
+        MUT resets the GameScene so all state information is null, all groups empty etc.
+        :return: None
+        """
+        pass
 
     def parse_input(self, *events):
         """
@@ -77,8 +73,13 @@ class GameScene(scene.Scene):
                     # TODO params for pause menu
                     self.next = "MENU"
                 elif event.key == "space":
-                    self.player.fire(self.ally_bullets)
+                    self.player.fire(self)
+                elif event.key == "missile":
+                    pass
+                elif event.key == "bomb":
+                    pass
                 # TODO other specials
+            # Set the movement to zero if Key_
             elif event.up:
                 if event.key == "up":
                     self.player.vy = 0
@@ -92,9 +93,10 @@ class GameScene(scene.Scene):
 
     def update(self, dt):
         # Updates every entity, using delta time
-        self.render_group.update(dt)
+        self.render_group.update(dt, self)
         # TODO spawns appropriate entities given Level_Time
         # Check for enemies colliding with player
+        # TODO for peformance switch to less performance heavy lis parsing
         for sprite in pg.sprite.spritecollide(self.player, self.enemies, dokill=False):
             sprite.collide(self.player)
         # Check for bullets
@@ -108,15 +110,15 @@ class GameScene(scene.Scene):
         for enemy in collide_dict:
             for bullet in collide_dict[enemy]:
                 bullet.collide(enemy)
-        # TODO how to check for score
+        # DONE:= Score will be increased via enemies that die during their update methods
         # TODO logic on player if player is alive
-        # TODO Screen object should be scrolled by dt
+        # DONE := screen object now accepts a dt param
         return
 
     def render(self, screen):
         """
-
-        :param screen: screen.Screen object to utilize
+        PROC Screen may be removed in future versions
+        :param screen: screen.Screen object to utiliz
         :return:
         """
         # blit background

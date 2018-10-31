@@ -82,7 +82,7 @@ class SceneManager:
         :return:
         """
         new = self.scenes.get(next_scene) # gets new Scene typeobject
-        if new is None: # Error Checking to be let us know when and where what went wrong
+        if new is None:  # Error Checking to be let us know when and where what went wrong
             raise ValueError("{} attempted to load undefined {} with params {}"\
                 .format(self.current_scene, next_scene, settings)
             )

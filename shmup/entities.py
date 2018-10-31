@@ -80,21 +80,13 @@ class Player(pg.sprite.Sprite):
         # Starting health
         self.hp = hp
         # Class positions
-        self.x = x
-        self.y = y
-        # Initial image and what to be blitted
         self.image = self.__class__.Anim_Idle[self.frame]
         # Set transparecy
         self.image.set_colorkey((255, 255, 255))
-        # Flag for which animation state
         self.animation = 0
-        # frame int to represent which integer of animation we're on
         self.frame = frame
-        # Number of frames called currently, use for multiframe animation
         self.frame_count = 0
         self.animation_cycle = 1
-        # Number of Respawns
-        self.lives = lives
         self.speed = 2.5
         # Variables for "Direction" of movement; multiple by speed for update
         self.vx = 0
@@ -110,19 +102,72 @@ class Player(pg.sprite.Sprite):
             self.vy = dy * self.speed
         return
 
-    def update(self, dt, *groups):
+    def update(self, dt, game_state):
         """
         Prcoedure updates the module and all appropriate AI/elements
         :param dt: time interval for
+        :param game_state: GameScene or other wrapper for groups
         """
-        self.x += self.vx * dt
-        self.y += self.vy * dt
         # TODO collision detection to ensure does not move out of gamespace
-        self.rect.move_ip(self.x, self.y)
+        self.rect.move_ip(self.vy * dt, self.vx * dt)
+        self.animate(dt)
         return
 
     def animate(self, dt=0):
+        # TODO: Implement animation cycle. Google wiki for sources; would prefer static packaging instead of multi
+        # TODO: step blitting, unless we overload Draw in our Groups [Which may be worthwhile]
         pass
 
-    def fire(self, *groups):
+    def fire(self, game_state):
+        """
+        Spawns Bullet in GameState
+        :param game_state:
+        :return:
+        """
+        # TODO make bullet class
+        pass
+
+
+class Bullet(pg.sprite):
+    """
+    Generic Bullet class
+    Kills itself on Collision, as handled in main game loop, though may spawn other things like Explosion depending on
+    collide code
+    """
+
+    def __init__(self, x, y, damage, image, speed, *groups):
+        super(Bullet, self).__init__(groups)
+        self.damage = damage
+        self.image = image
+        self.speed = speed
+        self.rect = pg.Rect((x, y, x + 16, y + 16))  # TODO actual bullet size for collision
+
+    def update(self, dt, game_state):
+        """
+        Moves the bullet up
+        :param dt:
+        :param game_state: Game state to modify
+        :return:
+        """
+        self.rect.move_ip(0, self.speed * dt)
+        return
+
+    def colide(self, other):
+        """
+        Collision code for bullet
+        :param other: Other Sprite that will have this script acting on it
+        :return:
+        """
+        other.hp -= self.damage
+        return
+
+
+class Missile(Bullet):
+    """
+    Missile Class
+    Extends Bullet but has group effect explossion
+    """
+
+    def __init__(self, x, y, image, speed, *groups):
+        super(Missile, self).__init__(x, y, image, speed, *groups)
         pass

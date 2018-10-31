@@ -1,4 +1,9 @@
 # set __all__ for easy imports
-__all__ = ["entities", "game", "main", "menu", "myevent", "screen", "scene"]
-import pygame as pg
-import entities, game, menu, myevent, scene, screen
+__all__ = ["entities", "game", "menu", "myevent", "screen", "scene"]
+# import everything
+import entities
+import game
+import menu
+import myevent
+import scene
+import screen
