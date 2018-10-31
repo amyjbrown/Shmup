@@ -1,4 +1,4 @@
-# Entites and various ingame things
+# Entities and various ingame things
 # Should use class methods for setup and image loading
 import pygame as pg
 
@@ -67,7 +67,7 @@ class Player(pg.sprite.Sprite):
     Graph_Rect = pg.Rect(0, 0, 64, 64)
     Anim_Idle = [Spritesheet]
 
-    def __init__(self, x, y, lives=2, frame=0, hp=100, *groups):
+    def __init__(self, x, y, observer, *groups):
         super(Player, self).__init__(groups)
         """
         :param x:
@@ -76,18 +76,21 @@ class Player(pg.sprite.Sprite):
         :param frame:
         :param groups
         """
+        # Observer entity for monitoring and handling actor
+        self.observer = observer
         self.rect = pg.Rect(0, 0, 64, 64).move(x, y)
         # Starting health
-        self.hp = hp
-        # Class positions
+        self.hp = 100
+        # Load Image and setup
         self.image = self.__class__.Anim_Idle[self.frame]
-        # Set transparecy
         self.image.set_colorkey((255, 255, 255))
+        # Enum for animation
         self.animation = 0
-        self.frame = frame
+        self.frame = 0
         self.frame_count = 0
+        # Length of animation cycle
         self.animation_cycle = 1
-        self.speed = 2.5
+        self.speed = 60  # Pixels/Second
         # Variables for "Direction" of movement; multiple by speed for update
         self.vx = 0
         self.vy = 0
@@ -102,72 +105,34 @@ class Player(pg.sprite.Sprite):
             self.vy = dy * self.speed
         return
 
-    def update(self, dt, game_state):
+    def update(self, dt):
         """
         Prcoedure updates the module and all appropriate AI/elements
         :param dt: time interval for
-        :param game_state: GameScene or other wrapper for groups
         """
         # TODO collision detection to ensure does not move out of gamespace
         self.rect.move_ip(self.vy * dt, self.vx * dt)
         self.animate(dt)
         return
 
+    def notify(self, entity, event):
+        """
+        MUT Sends notification method to observer
+        """
+        self.observer.on_notify(entity, event)
+        pass
+
     def animate(self, dt=0):
         # TODO: Implement animation cycle. Google wiki for sources; would prefer static packaging instead of multi
         # TODO: step blitting, unless we overload Draw in our Groups [Which may be worthwhile]
         pass
 
-    def fire(self, game_state):
+    def fire(self):
         """
-        Spawns Bullet in GameState
-        :param game_state:
+        Sends Spawn Bullet to Observer
         :return:
         """
         # TODO make bullet class
         pass
 
 
-class Bullet(pg.sprite):
-    """
-    Generic Bullet class
-    Kills itself on Collision, as handled in main game loop, though may spawn other things like Explosion depending on
-    collide code
-    """
-
-    def __init__(self, x, y, damage, image, speed, *groups):
-        super(Bullet, self).__init__(groups)
-        self.damage = damage
-        self.image = image
-        self.speed = speed
-        self.rect = pg.Rect((x, y, x + 16, y + 16))  # TODO actual bullet size for collision
-
-    def update(self, dt, game_state):
-        """
-        Moves the bullet up
-        :param dt:
-        :param game_state: Game state to modify
-        :return:
-        """
-        self.rect.move_ip(0, self.speed * dt)
-        return
-
-    def colide(self, other):
-        """
-        Collision code for bullet
-        :param other: Other Sprite that will have this script acting on it
-        :return:
-        """
-        other.hp -= self.damage
-        return
-
-
-class Missile(Bullet):
-    """
-    Missile Class
-    Extends Bullet but has group effect explossion
-    """
-
-    def __init__(self, x, y, image, speed, *groups):
-        super(Missile, self).__init__(x, y, image, speed, *groups)
-        pass
