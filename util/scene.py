@@ -21,7 +21,7 @@ class Scene:
         self.final: bool = False # Use for quitting main game_loop
         self.next: str = None  # Use for setting next element
         self.next_params: dict = False
-        pass
+        return
 
     def parse_input(self, *events):
         """
@@ -62,7 +62,8 @@ class SceneManager:
     A Singleton Scene Manager, used to hold and run the main game loop
     Try to decouple this as strongly from scenes as possible - they don't need to know their maker
     """
-    def __init__(self, scene_dict: dict, initial: str):
+
+    def __init__(self, scene_dict: dict, initial: str, display, event_manager, audio_manager):
         """
         Initializes State Machine
         :param scene_dict: str -> Scene mapping for states
@@ -72,6 +73,9 @@ class SceneManager:
         self.current_id: str = initial
         self.scenes: dict = scene_dict
         self.current_scene: Scene = self.scenes[self.current_id]()
+        self.display = display
+        self.event_manager = event_manager
+        self.audio_maanger = audio_manager
         return
 
     def swap_scene(self, next_scene: str, settings: dict):
@@ -98,17 +102,14 @@ class SceneManager:
         """
         # Game utilities outside of the structure
         clock = pg.time.Clock()
-        global display # Surface we blit to, a Singleton
-        global event_manager
-        global audiomanager
         # While Game
         while not self.current_scene.final:
             dt = clock.Tick(60) / 1000  # Takes dt and locks max framerate at 60
-            self.current_scene.parse_input(event_manager.get())
+            self.current_scene.parse_input(self.event_manager.get())
             self.current_scene.update(dt)
             if self.current_scene.next:  # check here so no one-frame lag of loading new scene
                 self.swap_scene(self.current_scene.next, self.current_scene.next_params)
-            self.current_scene.render(display)
+            self.current_scene.render(self.display)
         # Once we reach scene.final, we do end/cleanup
         return
 

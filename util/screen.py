@@ -12,6 +12,7 @@ class Background:
         :param speed: Speed in pixels updated per frame Positive scrolls up, negative scrolls down
         """
         self.surface = surface.subsurface(r)
+        self.rect = r
         self.im = pygame.image.load(im).convert()  # Creates surface
         self.w, self.h = self.im.get_size()
         self.x = 0

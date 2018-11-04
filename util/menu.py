@@ -3,14 +3,30 @@
 import scene
 
 
-class MenuWidget:
-
+class ButtonWidget:
     """
     Base class for MenuWidget elements and GUI elements
     """
-    def __init__(self):
+
+    def __init__(self, text, fun: function):
+        self.text = text
+        self.fun = fun
         return
 
+    def draw(self):
+        pass
 
-class Menu(scene):
-    pass
+    def enter(self):
+        self.fun()
+
+
+class Menu(scene.Scene):
+    """
+    A Menu Scene
+    """
+
+    def __init__(self):
+        super(Menu, self).__init__()
+        self.back = None  #
+        self.location = 0
+        self.widgets = ["Play Game"]

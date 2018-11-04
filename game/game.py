@@ -1,4 +1,3 @@
-#
 # core game stuff
 # Almost everything goes here
 # Gonna be the heaviest boy
@@ -7,6 +6,7 @@
 # Changelog: Added GameState object into here
 import pygame as pg
 
+import util
 from . import player
 
 
@@ -16,10 +16,10 @@ class GameScene:
     Main GameScene object to hold primary game interactions
     Data that is held includes the various Sprite groups, metadata like score stuff
     """
-    def __init__(self, **settings):
+
+    def __init__(self, screen):
         """
         Creates new game scene with optional GameState
-        :param state: Previous GameState to be loaded in, if None state is initialized
         """
         self.final: bool = False  # Use for quitting main game_loop
         self.next: str = None  # Use for setting next element
@@ -28,6 +28,7 @@ class GameScene:
         # Groups
         # self.player_screen = screen.Background() Init details
         # TODO - Config file for initializing Display, etc.
+        self.screen = screen
         self.player = player.Player(200, 200, self, self.render_group)
         self.render_group = pg.sprite.Group()
         self.effects = pg.sprite.Group()
@@ -70,7 +71,7 @@ class GameScene:
                     # TODO params for pause menu
                     self.next = "MENU"
                 elif event.key == "space":
-                    self.player.fire(self)
+                    self.player.fire()
                 elif event.key == "missile":
                     pass
                 elif event.key == "bomb":
@@ -109,16 +110,40 @@ class GameScene:
                 bullet.collide(enemy)
         # DONE:= Score will be increased via enemies that die during their update methods
         # TODO logic on player if player is alive
-        # DONE := screen object now accepts a dt param
+        self.screen.scroll(dt)
         return
 
-    def render(self, screen):
+    def render(self, display):
         """
         PROC Screen may be removed in future versions
-        :param screen: screen.Screen object to utiliz
         :return:
         """
-        # blit background
-        # Blit main
-        self.render_group.draw(screen.play_screen)
+        self.render_group.draw(self.screen)
+        pg.display.update(self.screen.rect)
         pass
+
+
+if __name__ == "__main__":
+    display = pg.display.set_mode((400, 640))
+    keys = ["up", "down", "left", "right", "fire", "missile", "bomb", "menu"]
+    key_map = {"up": [pg.K_UP, pg.K_w],
+               "down": [pg.K_DOWN, pg.K_s],
+               "right": [pg.K_RIGHT, pg.K_d],
+               "left": [pg.K_LEFT, pg.K_a],
+               "menu": [pg.K_ESCAPE],
+               "fire": [pg.K_SPACE],
+               "missile": [pg.K_x],
+               "bomb": [pg.K_z],
+               }
+
+    input_manager = util.input.EventManager(keys, key_map)
+    game = GameScene(util.screen.Background(surface=display,
+                                            im='C:/Users/Jonathan/PycharmProjects/shmup/Assets/BG1.bmp',
+                                            r=pg.Rect(0, 0, 400, 640),
+                                            speed=42))
+    clock = pg.time.Clock()
+    while not game.final:
+        dt = clock.Tick(60) / 1000
+        game.parse_input(input_manager.get())
+        game.update(dt)
+        game.render(display)
