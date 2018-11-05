@@ -3,8 +3,6 @@
 # Imports
 import pygame as pg
 
-import shmup
-
 # Initialize PyGame Display and custom scene
 display = pg.display.set_mode((480, 640))
 
@@ -23,10 +21,8 @@ event_manager = shmup.myevent.EventManager(keys, key_map)
 # Sound Manager - Still to do
 sound_manager = 0
 # Scene manager set up
-states = {
-    "game": shmup.game.GameScene,
-}
-manager = shmup.scene.SceneManager(states, "game")
+
+manager = shmup.scene.SceneManager(states, "core")
 # Do Main Game Loop!
 manager.main_loop()
 # Once done, system exit

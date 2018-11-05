@@ -1,9 +1,12 @@
 # Player class
 import pygame as pg
 
+import projectile
+
 
 class Player(pg.sprite.Sprite):
     Spritesheet = pg.image.load("../Assets/Ship.bmp")
+    Spritesheet.convert()
     Graph_Rect = pg.Rect(0, 0, 64, 64)
     Anim_Idle = [Spritesheet]
 
@@ -12,9 +15,8 @@ class Player(pg.sprite.Sprite):
         """
         :param x:
         :param y:
-        :param lives:
-        :param frame:
-        :param groups
+        :param observer
+        :param *groups
         """
         # Observer entity for monitoring and handling actor
         self.observer = observer
@@ -22,27 +24,23 @@ class Player(pg.sprite.Sprite):
         # Starting health
         self.hp = 100
         # Load Image and setup
-        self.image = self.__class__.Anim_Idle[self.frame]
+        self.frame = 0
+        self.image = self.__class__.Anim_Idle[0]
         self.image.set_colorkey((255, 255, 255))
+        self.image.convert()
         # Enum for animation
         self.animation = 0
         self.frame = 0
         self.frame_count = 0
         # Length of animation cycle
         self.animation_cycle = 1
-        self.speed = 60  # Pixels/Second
+        self.speed = 120  # Pixels/Second
         # Variables for "Direction" of movement; multiple by speed for update
         self.vx = 0
         self.vy = 0
         # cooldown - Frames between shots
         self.cooldown = 0
-        return
-
-    def set_direction(self, dx=None, dy=None):
-        if dx is not None:
-            self.vx = dx * self.speed
-        if dy is not None:
-            self.vy = dy * self.speed
+        self.COOLDOWN_MAX = 1 / 10
         return
 
     def update(self, dt):
@@ -51,8 +49,9 @@ class Player(pg.sprite.Sprite):
         :param dt: time interval for
         """
         # TODO collision detection to ensure does not move out of gamespace
-        self.rect.move_ip(self.vy * dt, self.vx * dt)
-        self.animate(dt)
+        self.rect.move_ip(self.vx * dt, self.vy * dt)
+        self.cooldown -= dt
+        # self.animate(dt)
         return
 
     def notify(self, entity, event):
@@ -72,5 +71,8 @@ class Player(pg.sprite.Sprite):
         Sends Spawn Bullet to Observer
         :return:
         """
-        # TODO make bullet class
-        pass
+        if self.cooldown <= 0:
+            projectile.Bullet(self.observer, self.rect.x + 24, self.rect.y - 5,
+                              self.observer.render_group, self.observer.ally_bullets)
+            self.cooldown = self.COOLDOWN_MAX
+        return

@@ -2,6 +2,12 @@ import pygame as pg
 
 import util
 
+# Game Area
+GAME_AREA = [400, 640]  # TODO change all assets over to 480x640
+GAME_RECT = pg.Rect(0, 0, 400, 640)
+GAME_RECT_EXTEND = pg.Rect((-64, -64,), (464, 704))
+__author__ = "Amy Brown <3"
+DISPLAY = pg.display.set_mode(GAME_AREA)
 # Define prebakes
 keys = ["up", "down", "left", "right", "fire", "missile", "bomb", "menu"]
 key_map = {"up": [pg.K_UP, pg.K_w],

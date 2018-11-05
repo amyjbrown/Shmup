@@ -1,4 +1,4 @@
-# core game stuff
+# core core stuff
 # Almost everything goes here
 # Gonna be the heaviest boy
 # TODO Decide whether or not procedure based input_parsing, or in main_loop
@@ -6,20 +6,22 @@
 # Changelog: Added GameState object into here
 import pygame as pg
 
-import util
-from . import player
+import config
+import enemy
+import player
+import util.input
 
 
 # GameScene Object
 class GameScene:
     """
-    Main GameScene object to hold primary game interactions
+    Main GameScene object to hold primary core interactions
     Data that is held includes the various Sprite groups, metadata like score stuff
     """
 
     def __init__(self, screen):
         """
-        Creates new game scene with optional GameState
+        Creates new core scene with optional GameState
         """
         self.final: bool = False  # Use for quitting main game_loop
         self.next: str = None  # Use for setting next element
@@ -29,13 +31,14 @@ class GameScene:
         # self.player_screen = screen.Background() Init details
         # TODO - Config file for initializing Display, etc.
         self.screen = screen
-        self.player = player.Player(200, 200, self, self.render_group)
         self.render_group = pg.sprite.Group()
         self.effects = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
         self.tokens = pg.sprite.Group()
         self.ally_bullets = pg.sprite.Group()
         self.enemy_bullets = pg.sprite.Group()
+        # Player Stuff
+        self.player = player.Player(200, 200, self, self.render_group)
         self.lives = 2
         self.total_score = 0
         self.local_score = 0
@@ -49,49 +52,50 @@ class GameScene:
         """
         pass
 
-    def parse_input(self, *events):
+    def parse_input(self):
         """
         Takes in
         :param events: Events to be parsed
         :return:
         """
+        # input(list(events))
+        events = config.input_manager.get()
         for event in events:
             if event.key == "QUIT":
                 self.final = True  # Quit loop
             elif event.down:
-                if event.key == "up":
-                    self.player.vy = -self.player.speed
-                elif event.key == "down":
-                    self.player.vy = self.player
-                elif event.key == "left":
-                    self.player.vx = -self.player.speed
-                elif event.key == "right":
-                    self.player.vx = self.player.speed
-                elif event.key == "menu":
+                if event.key == "menu":
                     # TODO params for pause menu
-                    self.next = "MENU"
-                elif event.key == "space":
-                    self.player.fire()
+                    self.player.speed = int(input("Current: {} New: ".format(self.player.speed)))
+                    # self.next = "MENU"
                 elif event.key == "missile":
-                    pass
+                    enemy.TestEnemy(self, 200, -16, self.render_group, self.enemies)
                 elif event.key == "bomb":
                     pass
                 # TODO other specials
-            # Set the movement to zero if Key_
-            elif event.up:
-                if event.key == "up":
-                    self.player.vy = 0
-                elif event.key == "down":
-                    self.player.vy = 0
-                elif event.key == "left":
-                    self.player.vx = 0
-                elif event.key == "right":
-                    self.player.vx = 0
-        pass
+        # Now for smoother movement
+        # Ensures no pausing
+        if config.input_manager.pressed["left"] and not config.input_manager.pressed["right"]:
+            self.player.vx = -self.player.speed
+        elif config.input_manager.pressed["right"] and not config.input_manager.pressed["left"]:
+            self.player.vx = +self.player.speed
+        else:
+            self.player.vx = 0
+        # Vertical movement
+        if config.input_manager.pressed["up"] and not config.input_manager.pressed["down"]:
+            self.player.vy = -self.player.speed
+        elif config.input_manager.pressed["down"] and not config.input_manager.pressed["up"]:
+            self.player.vy = +self.player.speed
+        else:
+            self.player.vy = 0
+        # Do rest
+        if config.input_manager.pressed["fire"]:
+            self.player.fire()
+        return
 
     def update(self, dt):
         # Updates every entity, using delta time
-        self.render_group.update(dt, self)
+        self.render_group.update(dt)
         # TODO spawns appropriate entities given Level_Time
         # Check for enemies colliding with player
         # TODO for peformance switch to less performance heavy lis parsing
@@ -118,12 +122,13 @@ class GameScene:
         PROC Screen may be removed in future versions
         :return:
         """
-        self.render_group.draw(self.screen)
+        self.render_group.draw(self.screen.surface)
         pg.display.update(self.screen.rect)
         pass
 
 
 if __name__ == "__main__":
+    pg.init()
     display = pg.display.set_mode((400, 640))
     keys = ["up", "down", "left", "right", "fire", "missile", "bomb", "menu"]
     key_map = {"up": [pg.K_UP, pg.K_w],
@@ -136,14 +141,14 @@ if __name__ == "__main__":
                "bomb": [pg.K_z],
                }
 
-    input_manager = util.input.EventManager(keys, key_map)
     game = GameScene(util.screen.Background(surface=display,
                                             im='C:/Users/Jonathan/PycharmProjects/shmup/Assets/BG1.bmp',
                                             r=pg.Rect(0, 0, 400, 640),
                                             speed=42))
     clock = pg.time.Clock()
     while not game.final:
-        dt = clock.Tick(60) / 1000
-        game.parse_input(input_manager.get())
+        dt = clock.tick(60) / 1000
+        game.parse_input()
         game.update(dt)
         game.render(display)
+        pg.display.set_caption("FPS: " + str(1 / dt))

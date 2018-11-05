@@ -39,8 +39,9 @@ class EventManager:
             for pygame_key in key_map[custom]:
                 self.key_map[pygame_key] = custom
         # for python _pressed method
-        for b in keys:
+        for b in buttons:
             self.pressed[b] = False
+        print(self.pressed)
         # Sets values we are allowed to have as input
         self.inputs = list(self.key_map.keys())
         return
@@ -63,8 +64,13 @@ class EventManager:
                 event_list.append(Event(key, True))
                 self.pressed[key] = True
             elif event.type == pg.KEYUP and event.key in self.inputs:
-                event_list.append(Event(self.key_map[event.key], False))
+                key = self.key_map[event.key]
+                event_list.append(Event(key, False))
+                self.pressed[key] = False
         return event_list
+
+
+# Now do initialization
 
 
 # unit test

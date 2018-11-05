@@ -8,7 +8,7 @@ class Scene:
 
     """
     Abstract Scene class to be overloaded; any core data should be placed in here
-    Interface and state holder for individual game scene
+    Interface and state holder for individual core scene
     Self.next should default to None
     Contains a parse input, update and render method
     """
@@ -50,7 +50,7 @@ class Scene:
     def render(self, surface):
         """
         Renders state of scene onto surface
-        Main display surface for normal game
+        Main display surface for normal core
         :return:
         """
         pass
@@ -59,7 +59,7 @@ class Scene:
 class SceneManager:
 
     """
-    A Singleton Scene Manager, used to hold and run the main game loop
+    A Singleton Scene Manager, used to hold and run the main core loop
     Try to decouple this as strongly from scenes as possible - they don't need to know their maker
     """
 
