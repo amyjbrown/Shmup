@@ -23,6 +23,7 @@ class TestEnemy(pg.sprite.Sprite):
 
     def update(self, dt):
         if self.hp <= 0:
+            self.observer.score(200)
             self.kill()
         if not config.GAME_RECT_EXTEND.contains(self.rect):
             self.kill()

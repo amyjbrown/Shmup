@@ -41,6 +41,8 @@ class Player(pg.sprite.Sprite):
         # cooldown - Frames between shots
         self.cooldown = 0
         self.COOLDOWN_MAX = 1 / 10
+        # Fire side - used for alternating fire
+        self.fire_side = False
         return
 
     def update(self, dt):
@@ -72,7 +74,10 @@ class Player(pg.sprite.Sprite):
         :return:
         """
         if self.cooldown <= 0:
-            projectile.Bullet(self.observer, self.rect.x + 24, self.rect.y - 5,
+            projectile.Bullet(self.observer,
+                              self.rect.x + 20 + 8 * self.fire_side,
+                              self.rect.y - 5,
                               self.observer.render_group, self.observer.ally_bullets)
             self.cooldown = self.COOLDOWN_MAX
+            self.fire_side = not self.fire_side
         return
