@@ -4,7 +4,6 @@
 # TODO Decide whether or not procedure based input_parsing, or in main_loop
 # TODO User movement inside of
 # Changelog: Added GameState object into here
-import random
 
 import pygame as pg
 
@@ -81,15 +80,13 @@ class GameScene:
                 elif event.key == "bomb":
                     print("Bomba")
                 elif event.key == "debug1":
-                    enemy.TestEnemy(self, random.randrange(0, 363), -64, self.render_group, self.enemies)
+                    enemy.TestEnemy(self, 200, -64, self.render_group, self.enemies)
                 elif event.key == "debug2":
-                    powerup.HealthToken(self, random.randrange(0, 363), -64, self.render_group, self.tokens)
+                    powerup.HealthToken(200, -64, self.render_group, self.tokens)
                 elif event.key == "debug3":
                     print("got3")
                 elif event.key == "debug4":
                     print("Got4")
-
-
         # Now for smoother movement
         # Ensures no pausing
         if pressed["left"] and not pressed["right"]:
@@ -118,7 +115,7 @@ class GameScene:
         # Check for enemies colliding with player
         # TODO for peformance switch to less performance heavy lis parsing
         for sprite in pg.sprite.spritecollide(self.player, self.enemies, dokill=False):
-            sprite.collide(self.player)
+            sprite.collide(self.player, dt)
         # Check for bullets
         for bullet in pg.sprite.spritecollide(self.player, self.enemy_bullets, dokill=True):
             bullet.collide(self.player)
@@ -147,10 +144,10 @@ class GameScene:
 
 if __name__ == "__main__":
     pg.init()
-    display = pg.display.set_mode((400, 640))
+    display = pg.display.set_mode((480, 640))
     game = GameScene(util.screen.Background(surface=display,
                                             im='C:/Users/Jonathan/PycharmProjects/shmup/Assets/BG1.bmp',
-                                            r=pg.Rect(0, 0, 400, 640),
+                                            r=pg.Rect(0, 0, 480, 640),
                                             speed=42))
     clock = pg.time.Clock()
     while not game.final:
@@ -159,4 +156,5 @@ if __name__ == "__main__":
         game.parse_input(config.input_manager.pressed, events)
         game.update(dt)
         game.render(display)
-        pg.display.set_caption("FPS: {:4.2f}, \t Score: {}".format((1 / dt), game.total_score))
+        pg.display.set_caption("FPS: {:4.2f}, \t Score: {:.2f}\t Life: {:.2f}".
+                               format((1 / dt), game.total_score, game.player.health))

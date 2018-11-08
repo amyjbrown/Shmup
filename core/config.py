@@ -3,9 +3,9 @@ import pygame as pg
 import util.input
 
 # Game Area
-GAME_AREA = [400, 640]  # TODO change all assets over to 480x640
-GAME_RECT = pg.Rect(0, 0, 400, 640)
-GAME_RECT_EXTEND = pg.Rect((-64, -64,), (464, 704))
+GAME_AREA = [480, 640]  # TODO change all assets over to 480x640
+GAME_RECT = pg.Rect(0, 0, 480, 640)
+GAME_RECT_EXTEND = pg.Rect(-64, -64, 608, 768)
 __author__ = "Amy Brown <3"
 DISPLAY = pg.display.set_mode(GAME_AREA)
 # Define prebakes

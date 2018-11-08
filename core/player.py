@@ -1,6 +1,7 @@
 # Player class
 import pygame as pg
 
+import config
 import projectile
 
 
@@ -22,7 +23,7 @@ class Player(pg.sprite.Sprite):
         self.observer = observer
         self.rect = pg.Rect(0, 0, 64, 64).move(x, y)
         # Starting health
-        self.hp = 100
+        self.health = 100
         # Load Image and setup
         self.frame = 0
         self.image = self.__class__.Anim_Idle[0]
@@ -51,7 +52,10 @@ class Player(pg.sprite.Sprite):
         :param dt: time interval for
         """
         # TODO collision detection to ensure does not move out of gamespace
-        self.rect.move_ip(self.vx * dt, self.vy * dt)
+        if config.GAME_RECT.contains(self.rect.move(0, self.vy * dt)):
+            self.rect.move_ip(0, self.vy * dt)
+        if config.GAME_RECT.contains(self.rect.move(self.vx * dt, 0)):
+            self.rect.move_ip(self.vx * dt, 0)
         self.cooldown -= dt
         # self.animate(dt)
         return

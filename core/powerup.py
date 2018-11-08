@@ -20,10 +20,10 @@ class HealthToken(pg.sprite.Sprite):
         self.rect.move_ip(0, self.speed * dt)
 
     def collide(self, other):
-        t = other.hp + self.healing
+        t = other.health + self.healing
         if t > 100:
-            self.observer.score(5 * (t - 100))
-            other.hp = 100
+            self.observer.score(int(t - 100) * 5)
+            other.health = 100
         else:
-            other.hp += self.healing
+            other.health += self.healing
         return
