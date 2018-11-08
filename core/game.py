@@ -82,7 +82,7 @@ class GameScene:
                 elif event.key == "debug1":
                     enemy.TestEnemy(self, 200, -64, self.render_group, self.enemies)
                 elif event.key == "debug2":
-                    powerup.HealthToken(200, -64, self.render_group, self.tokens)
+                    powerup.HealthToken(200, -64, self, self.render_group, self.tokens)
                 elif event.key == "debug3":
                     print("got3")
                 elif event.key == "debug4":

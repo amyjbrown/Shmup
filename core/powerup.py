@@ -8,7 +8,7 @@ class HealthToken(pg.sprite.Sprite):
     image.set_colorkey(image.get_at((0, 0)))
     image.convert()
 
-    def __init__(self, observer, x, y, *groups):
+    def __init__(self, x, y, observer, *groups):
         super().__init__(*groups)
         self.observer = observer
         self.image = __class__.image
