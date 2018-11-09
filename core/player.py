@@ -22,6 +22,7 @@ class Player(pg.sprite.Sprite):
         # Observer entity for monitoring and handling actor
         self.observer = observer
         self.rect = pg.Rect(0, 0, 64, 64).move(x, y)
+        self.x, self.y = x, y
         # Starting health
         self.health = 100
         # Load Image and setup
@@ -53,9 +54,11 @@ class Player(pg.sprite.Sprite):
         """
         # TODO collision detection to ensure does not move out of gamespace
         if config.GAME_RECT.contains(self.rect.move(0, self.vy * dt)):
-            self.rect.move_ip(0, self.vy * dt)
+            self.y += self.vy * dt
+            self.rect.y = self.y
         if config.GAME_RECT.contains(self.rect.move(self.vx * dt, 0)):
-            self.rect.move_ip(self.vx * dt, 0)
+            self.x += self.vx * dt
+            self.rect.x = self.x
         self.cooldown -= dt
         # self.animate(dt)
         return

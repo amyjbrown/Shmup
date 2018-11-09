@@ -14,6 +14,12 @@ import powerup
 import util.screen
 
 
+def check_collide(a: pg.sprite.Sprite, b: pg.sprite.Sprite):
+    if pg.sprite.collide_rect(a.collide_rect, b.collide_rect):
+        return True
+    else:
+        return False
+
 # GameScene Object
 class GameScene:
     """
