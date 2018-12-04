@@ -18,12 +18,10 @@ class Event:
 
 
 class EventManager:
-
     """
     Event Manager class is a wrapper that initializes the Pygame Events -> Custom Event Keys
     Should work like pygame Events does
     """
-
     def __init__(self, buttons, key_map=None):
         """
         Initializes the Event manager with appropriate values
@@ -46,12 +44,21 @@ class EventManager:
         self.inputs = list(self.key_map.keys())
         return
 
-    def reset_map(self, key_map):
+    def controller_setup(self, buttons, key_map):
+        """
+        TODO rewrite
+        Setups a virtual controller interface
+        :param buttons:
+        :param key_map:
+        :return:
+        """
+
+    def reset_map(self, key_map) -> None:
         pass
 
-    def get(self)->list:
+    def get(self) -> list:
         """
-        Maps pygame.event.get() list t custom event list
+        Maps pygame.event.get() list custom event list
         :return: List of custom Events
         """
         # This impplicitly assumes that appropriate buttons will have blocked
@@ -69,11 +76,50 @@ class EventManager:
                 self.pressed[key] = False
         return event_list
 
+    def push(self) -> None:
+        """
+        Works as pg.push while still getting the information we need
+        :return:
+        """
 
-# Now do initialization
+    def poll_button(self, button: str) -> bool:
+        """
+        Returns true is button <id> is pressed down
+        :param button: Keyname for button
+        :return: Boolean True is button pressed down
+        """
+        try:
+            return self.pressed[button]
+        except KeyError:
+            raise pg.error("Attempted polling of undefined key")
+
+    def poll_joy(self, joy: str, as_hat: bool = False) -> pg.Vector2:
+        """
+        Polls joystick position, if as_hat, then round components up/down as if polling a hat
+        :param joy: Keyname for virtual joystick
+        :param as_hat: Will return as hat behavior
+        :return: Vector2 describing coordinates of Joystick
+        """
+        pass
+
+    def poll_hat(self, hat, norm: bool = False) -> pg.Vector2:
+        """
+        Sets
+        :param hat: Keyname for hat to poll
+        :param norm: True to set normalizing behavior
+        :return: Vector2 decribing position
+        """
+        pass
+
+    def poll_mouse(self, rel: bool = False) -> pg.Vector2:
+        """
+        Returns screen co-ordinates. If rel is true, returns Velocity in screenspace: <[-1,1],[1,1]>
+        :param rel: If true, returns position in screenspace
+        :return: Vector2 of position
+        """
+        pass
 
 
-# unit test
 if __name__ == "__main__":
     display = pg.display.set_mode((200,200))
     keys = ["up", "down", "left", "right", "fire", "missile", "bomb", "menu"]

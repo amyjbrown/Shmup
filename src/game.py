@@ -1,24 +1,17 @@
 # core core stuff
 # Almost everything goes here
-# Gonna be the heaviest boy
 # TODO Decide whether or not procedure based input_parsing, or in main_loop
 # TODO User movement inside of
 # Changelog: Added GameState object into here
-
 import pygame as pg
 
 import config
 import enemy
 import player
 import powerup
-import util.screen
+import projectile
+import util
 
-
-def check_collide(a: pg.sprite.Sprite, b: pg.sprite.Sprite):
-    if pg.sprite.collide_rect(a.collide_rect, b.collide_rect):
-        return True
-    else:
-        return False
 
 # GameScene Object
 class GameScene:
@@ -26,18 +19,27 @@ class GameScene:
     Main GameScene object to hold primary core interactions
     Data that is held includes the various Sprite groups, metadata like score stuff
     """
+    # Game Data
+    PLAYER = player.Player
+    ENEMY_DICT = {
+        "test": enemy.TestEnemy
+    }
+    POWERUP = {
+        "health": powerup.HealthToken
+    }
+    PROJECTILE = {
+        "play bullet": projectile.Bullet,
+    }
 
     def __init__(self, screen):
         """
-        Creates new core scene with optional GameState
+        Creates new core scene
         """
         self.final: bool = False  # Use for quitting main game_loop
         self.next: str = None  # Use for setting next element
         self.next_params: dict = False
-        # Player Initialization
-        # Groups
-        # self.player_screen = screen.Background() Init details
         # TODO - Config file for initializing Display, etc.
+
         self.screen = screen
         self.render_group = pg.sprite.Group()
         self.effects = pg.sprite.Group()
@@ -45,34 +47,73 @@ class GameScene:
         self.tokens = pg.sprite.Group()
         self.ally_bullets = pg.sprite.Group()
         self.enemy_bullets = pg.sprite.Group()
+
         # Player Stuff
-        self.player = player.Player(200, 200, self, self.render_group)
-        self.lives = 2
+        self.player = player.Player(pg.Vector2(200, 200), self.render_group)
+        self.lives = config.STARTING_LIVES
+
+        # Score and combo stuff
         self.total_score = 0
         self.local_score = 0
-        self.score_increment = 5000
+        self.score_increment = config.LIFE_SCORE
+        self.combo = int()
+        self.combo_increment = int()
+        self.combo_timer = float()
+        self.combo_hits = config.COMBO_INCREMENTS
+        self.combo_times = config.COMBO_TIME
         return
 
-    def score(self, increment):
-        self.total_score += increment
-        self.local_score += increment
-
-    def reset(self):
+    def setup(self):
         """
-        MUT resets the GameScene so all state information is null, all groups empty etc.
+        Performs pre-setup on all of the game objects
+        :return: None
+        """
+        for element in self.ENEMY_DICT.values():
+            element.setup()
+        for element in self.POWERUP.values():
+            element.setup()
+        self.PLAYER.setup()
+        pass
+
+    def score(self, increment: int, combo: bool = False):
+        """
+        Adds increment to the score, optionally
+        :param increment: Score increment
+        :param combo: If true, increment combo, reset combo_timer
+        :return: none
+        """
+        if combo:
+            self.total_score += increment * self.combo
+            self.local_score += increment * self.combo
+            self.combo += 1
+        else:
+            self.total_score += increment
+            self.local_score += increment
+
+    def clear_level(self):
+        """
+        Clears all entities
+        :return:
+        """
+        pass
+
+    def load_level(self, level_id):
+        """
+        Loads and initializes the appropriate level
+        :param level_id: Identifier of level to be loaded
         :return: None
         """
         pass
 
-    def parse_input(self, pressed, events):
+    def parse_input(self):
         """
         Parses and updates based on user_input
-        :param pressed:
-        :param events: Events to be parsed through
         :return: None
         """
         # input(list(events))
         # events = config.input_manager.get()
+        events = config.input_manager.get()
+        pressed = config.input_manager.pressed
         for event in events:
             if event.key == "QUIT":
                 self.final = True  # Quit loop
@@ -88,7 +129,7 @@ class GameScene:
                 elif event.key == "debug1":
                     enemy.TestEnemy(self, 200, -64, self.render_group, self.enemies)
                 elif event.key == "debug2":
-                    powerup.HealthToken(200, -64, self, self.render_group, self.tokens)
+                    powerup.HealthToken(200, -64, self.render_group, self.tokens)
                 elif event.key == "debug3":
                     print("got3")
                 elif event.key == "debug4":
@@ -115,11 +156,15 @@ class GameScene:
         return
 
     def update(self, dt):
+        """
+        Updates game state by delta step
+        :param dt: Time step for simulation
+        :return: None
+        """
         # Updates every entity, using delta time
         self.render_group.update(dt)
         # TODO spawns appropriate entities given Level_Time
         # Check for enemies colliding with player
-        # TODO for peformance switch to less performance heavy lis parsing
         for sprite in pg.sprite.spritecollide(self.player, self.enemies, dokill=False):
             sprite.collide(self.player, dt)
         # Check for bullets
@@ -135,6 +180,8 @@ class GameScene:
                 bullet.collide(enemy)
         # DONE:= Score will be increased via enemies that die during their update methods
         # TODO logic on player if player is alive
+        # Combo Shit
+        # combo
         self.screen.scroll(dt)
         return
 
@@ -147,7 +194,8 @@ class GameScene:
         pg.display.update(self.screen.rect)
         pass
 
-
+    def spawn(self, **kwargs):
+        pass
 if __name__ == "__main__":
     pg.init()
     display = pg.display.set_mode((480, 640))
@@ -159,7 +207,7 @@ if __name__ == "__main__":
     while not game.final:
         dt = clock.tick(60) / 1000
         events = config.input_manager.get()
-        game.parse_input(config.input_manager.pressed, events)
+        game.parse_input()
         game.update(dt)
         game.render(display)
         pg.display.set_caption("FPS: {:4.2f}, \t Score: {:.2f}\t Life: {:.2f}".
